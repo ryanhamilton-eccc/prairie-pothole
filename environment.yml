@@ -1,0 +1,15 @@
+name: pph
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - geemap
+  - geopandas
+  - jupyter
+  - ruff
+  - pip
+  - pip:
+      - geeft
+      - e .
+prefix: C:\Users\rhamilton\AppData\Local\miniconda3\envs\pph
