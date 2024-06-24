@@ -10,6 +10,7 @@ dependencies:
   - ruff
   - pip
   - pip:
-      - geeft
+      - geeft >= 0.1.2
+      - geersd >= 0.1.2
       - e .
 prefix: C:\Users\rhamilton\AppData\Local\miniconda3\envs\pph
