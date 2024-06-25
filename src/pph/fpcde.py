@@ -7,12 +7,11 @@ import pandas as pd
 from geersd import Sentinel1
 from timezonefinder import TimezoneFinder
 
-from fpcde.processing import Sentinel1Image
 
 
 class Sentinel1Extractor:
     def extract_and_process(
-        self, aoi, dates: tuple[str, str], asc: bool = False, desc: bool = False
+        self, aoi, dates: tuple[str, str],
     ):
         """extracts and converts Sentinel 1 to geopandas dataframe"""
         s1obj = (
@@ -22,13 +21,9 @@ class Sentinel1Extractor:
             .filterIWMode()
             .filterVV()
             .filterVH()
+            .filterAsc()
+            .filter(ee.Filter.eq('platform_number', 'B'))
         )
-
-        if asc:
-            s1obj = s1obj.filterAsc()
-
-        if desc:
-            s1obj = s1obj.filterDesc()
 
         # need to insert a fmt date time into each image
         s1obj = s1obj.map(self.insert_fmt_datetime)
@@ -63,6 +58,7 @@ class Sentinel1Extractor:
         df["timestamp"] = df.apply(
             lambda row: row["timestamp"].tz_convert(row["timezone"]), axis=1
         )
+        df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
         df["year"] = df["timestamp"].dt.year
         df["julian_date"] = df["timestamp"].dt.dayofyear
         return df
@@ -70,6 +66,7 @@ class Sentinel1Extractor:
     @staticmethod
     def compute_date_differential(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         df["y"] = df["y"].apply(lambda x: float(f"{x:.2f}"))
+        df["x"] = df["x"].apply(lambda x: float(f"{x:.2f}"))
         df["datedif"] = 0
         processed = []
         for _, group in df.groupby(["y", "relativeOrbitNumber_start"]):
@@ -81,10 +78,23 @@ class Sentinel1Extractor:
             [
                 "system:id",
                 "y",
+                "x",
                 "relativeOrbitNumber_start",
                 "timestamp",
+                "year",
                 "datedif",
                 "geometry",
             ]
         ]
         return dfout
+
+
+# def fetch_s1_tiles():
+#     """ """
+#     # time stamps need to be with in 04-01, 10-31 for any given year
+#     # need the pph aoi / region
+#     gdfs = []
+#     for i in range(2017, 2022):
+#         dates = (f"{i}-04-01", f"{i}-10-31")
+#         extractor = Sentinel1Extractor().extract_and_process(aoi=None, dates=dates)
+        
