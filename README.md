@@ -14,3 +14,5 @@ GEE project for the prairie pothole project
     1. Find valid times series for each frame
     2. we will need to compute the intersect of the geometry of the frames, 17 - 21
     3. that is the region of interest
+
+opca -> done on the years

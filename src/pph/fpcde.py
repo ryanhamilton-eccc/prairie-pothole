@@ -89,12 +89,15 @@ class Sentinel1Extractor:
         return dfout
 
 
-# def fetch_s1_tiles():
-#     """ """
-#     # time stamps need to be with in 04-01, 10-31 for any given year
-#     # need the pph aoi / region
-#     gdfs = []
-#     for i in range(2017, 2022):
-#         dates = (f"{i}-04-01", f"{i}-10-31")
-#         extractor = Sentinel1Extractor().extract_and_process(aoi=None, dates=dates)
-        
+def fetch_s1_tiles():
+    """ """
+    # time stamps need to be with in 04-01, 10-31 for any given year
+    # need the pph aoi / region
+    gdfs = []
+    for i in range(2017, 2022):
+        dates = (f"{i}-04-01", f"{i}-10-31")
+        extractor = Sentinel1Extractor().extract_and_process(aoi=None, dates=dates)
+
+
+def compute_intersect():
+    pass
