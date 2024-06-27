@@ -1,14 +1,13 @@
 import ee
 
-from pph.core import process_landsat
 # principal_components
 
 
 class PrincipalCompoent:
-    
-    def compute(self, region):
+
+    def compute(self, dataset: ee.Image, region):
         scale = 30
-        dataset = process_landsat(region, "1984", "2022").select("SR_B.*").median().clip(region)
+       
         band_names = dataset.bandNames()
         n_bands = ee.List.sequence(1, band_names.size())
         
@@ -23,6 +22,7 @@ class PrincipalCompoent:
             geometry=region,
             scale=scale,
             maxPixels=1e13,
+            bestEffort=True
         )
 
         # Get the 'array' covariance result and cast to an array.

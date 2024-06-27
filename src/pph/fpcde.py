@@ -22,7 +22,6 @@ class Sentinel1Extractor:
             .filterVV()
             .filterVH()
             .filterAsc()
-            .filter(ee.Filter.eq('platform_number', 'B'))
         )
 
         # need to insert a fmt date time into each image
@@ -69,7 +68,7 @@ class Sentinel1Extractor:
         df["x"] = df["x"].apply(lambda x: float(f"{x:.2f}"))
         df["datedif"] = 0
         processed = []
-        for _, group in df.groupby(["y", "relativeOrbitNumber_start"]):
+        for _, group in df.groupby(["y", "relativeOrbitNumber_start", 'platform_number']):
             group["datedif"] = group["julian_date"] - group["julian_date"].shift(1)
             group["datedif"] = group["datedif"].fillna(0)
             processed.append(group)
@@ -80,6 +79,7 @@ class Sentinel1Extractor:
                 "y",
                 "x",
                 "relativeOrbitNumber_start",
+                'platform_number',
                 "timestamp",
                 "year",
                 "datedif",
