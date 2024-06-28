@@ -31,6 +31,7 @@ class Sentinel1Extractor:
         s1_gdf = s1obj.toGeoPandasDataFrame()[
             ["system:id", "system:time_start", "relativeOrbitNumber_start", "geometry"]
         ]
+        s1_gdf = Sentinel1Extractor.insert_centroid_x_y(s1_gdf)
         s1_gdf = Sentinel1Extractor.localize_utc_time(s1_gdf)
         s1_gdf = Sentinel1Extractor.compute_date_differential(s1_gdf)
         s1_gdf["timestamp"] = s1_gdf["timestamp"].astype(str)
@@ -41,13 +42,21 @@ class Sentinel1Extractor:
         """set a meta prop called fmt_date fmt: YYYY-MM-dd"""
         date = ee.Image(image).date().format("YYYY-MM-dd")
         return image.set("fmt_date", date)
+    
+    @staticmethod
+    def insert_centroid_x_y(df: gpd.GeoDataFrame):
+        df["x"] = df.geometry.centroid.x
+        df["y"] = df.geometry.centroid.y
+
+        df["y"] = df["y"].apply(lambda x: float(f"{x:.2f}"))
+        df["x"] = df["x"].apply(lambda x: float(f"{x:.2f}"))
+        
+        return df
 
     @staticmethod
     def localize_utc_time(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         # date time conversion
         tf = TimezoneFinder()
-        df["x"] = df.geometry.centroid.x
-        df["y"] = df.geometry.centroid.y
         df["timezone"] = df.apply(
             lambda x: tf.timezone_at(lng=x["x"], lat=x["y"]), axis=1
         )
@@ -64,8 +73,6 @@ class Sentinel1Extractor:
 
     @staticmethod
     def compute_date_differential(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-        df["y"] = df["y"].apply(lambda x: float(f"{x:.2f}"))
-        df["x"] = df["x"].apply(lambda x: float(f"{x:.2f}"))
         df["datedif"] = 0
         processed = []
         for _, group in df.groupby(["y", "relativeOrbitNumber_start", 'platform_number']):
@@ -87,17 +94,3 @@ class Sentinel1Extractor:
             ]
         ]
         return dfout
-
-
-def fetch_s1_tiles():
-    """ """
-    # time stamps need to be with in 04-01, 10-31 for any given year
-    # need the pph aoi / region
-    gdfs = []
-    for i in range(2017, 2022):
-        dates = (f"{i}-04-01", f"{i}-10-31")
-        extractor = Sentinel1Extractor().extract_and_process(aoi=None, dates=dates)
-
-
-def compute_intersect():
-    pass
